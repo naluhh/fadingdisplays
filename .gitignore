@@ -1,0 +1,5 @@
+iosapp/fadingdisplay/*.xcodeproj/*
+iosapp/fadingdisplay/!*.xcodeproj/project.pbxproj
+iosapp/fadingdisplay/!*.xcodeproj/xcshareddata/
+iosapp/fadingdisplay/!*.xcworkspace/contents.xcworkspacedata
+iosapp/fadingdisplay/*.gcno
