@@ -58,7 +58,6 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-
         currentImage.backgroundColor = UIColor.black
         currentImage.translatesAutoresizingMaskIntoConstraints = false
         // Do any additional setup after loading the view.
