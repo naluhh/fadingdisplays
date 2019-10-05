@@ -169,7 +169,7 @@ app.get('/library/:id', function(req, res) {
 	    console.error(err.message);
 	}
     });
-    let request = 'SELECT ID id FILENAME file FROM LIBRARY WHERE ID = ?';
+    let request = 'SELECT ID id, FILENAME file FROM LIBRARY WHERE ID = ?';
 	try {
 		var found = false;
 		db.get(request, [req.params.id], (err, row) => {
