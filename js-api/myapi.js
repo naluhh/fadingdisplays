@@ -163,6 +163,49 @@ app.post('/library', upload.single('picture'),  function(req, res, next){
     }
 });
 
+app.delete('/library/:id', function(req, res) {
+    let db = new sqlite3.Database(dbname, (err) => {
+	if (err) {
+	    console.error(err.message);
+	}
+    });
+    let request = 'SELECT ID id, FILENAME file FROM LIBRARY WHERE ID = ?';
+	try {
+		var found = false;
+		db.get(request, [req.params.id], (err, row) => {
+			if (err) {
+			res.status(500).send('INTERNAL DB ERROR->' + err);
+			}
+			found = row ? true : false;
+			if (found == false) {
+				res.status(400).send('image not in lib');
+			} else {
+				const path = `${__dirname}/library/` + row.file;
+				
+				let request = 'DELETE FROM LIBRARY WHERE ID = ?';
+
+				db.run(request, [req.params.id], (err) => {
+					if (err) {
+						res.status(500).send('INTERNAL DB ERROR->' + err);
+					}
+
+					res.status(200).send({ 'deleted_item': req.params.id });
+				});
+
+				fs.unlink(path, (err) => {
+					if (err) {
+					console.error(err)
+					return;
+					}
+				});
+			}
+		});
+		} catch (err) {
+			res.status(500).send('OOPS' + err);
+		}
+		db.close();
+});
+
 app.get('/library/:id', function(req, res) {
     let db = new sqlite3.Database(dbname, (err) => {
 	if (err) {
