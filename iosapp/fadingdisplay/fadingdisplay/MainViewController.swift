@@ -7,11 +7,24 @@
 //
 
 import UIKit
+import CoreImage
+
+let screenResolution = CGSize.init(width: 5616, height: 3744)
 
 class ImageCell: UICollectionViewCell {
     static let reuseIdentifier = "ImageCell"
     let imageView: UIImageView = UIImageView()
 
+    override var isSelected: Bool {
+        set {
+            super.isSelected = newValue
+            updateSelectionState(selected: newValue)
+        }
+        get {
+            return super.isSelected
+        }
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
 
@@ -32,23 +45,36 @@ class ImageCell: UICollectionViewCell {
         imageView.image = image
     }
 
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        imageView.image = nil
+
+    func updateSelectionState(selected: Bool) {
+        if selected {
+            imageView.layer.borderColor = UIColor.white.cgColor
+            imageView.layer.borderWidth = 2
+            contentView.layer.shadowPath = UIBezierPath(rect: imageView.bounds).cgPath
+        } else {
+            imageView.layer.borderWidth = 0
+        }
     }
 
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        updateSelectionState(selected: false)
+        imageView.image = nil
+    }
 }
 
 class MainViewController : UIViewController {
-    let aspectRatio: CGFloat = 2880.0/2160.0
+    let aspectRatio: CGFloat = 3.0/2.0
     var collectionViewLayout: UICollectionViewFlowLayout?
     var collectionView: UICollectionView?
     let addButton = UIButton()
     let requestManager = RequestManager()
     let gradientLayer = CAGradientLayer()
+    var longPress: UILongPressGestureRecognizer?
 
     // Data
     var ids: [Int] = []
+    var selected_id: Int = -1
 
 
     override func viewDidLayoutSubviews() {
@@ -70,9 +96,12 @@ class MainViewController : UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-
         collectionViewLayout = UICollectionViewFlowLayout()
         collectionView = UICollectionView.init(frame: .zero, collectionViewLayout: collectionViewLayout!)
+        longPress = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress))
+        longPress?.minimumPressDuration = 2
+
+        collectionView?.addGestureRecognizer(longPress!)
         guard let collectionView = collectionView else {
             return
         }
@@ -99,6 +128,7 @@ class MainViewController : UIViewController {
         addButton.layer.shadowOffset = .zero
         addButton.translatesAutoresizingMaskIntoConstraints = false
         addButton.setImage(UIImage(named: "icAdd"), for: .normal);
+        addButton.addTarget(self, action: #selector(addPhoto), for: .touchUpInside)
         view.addSubview(addButton)
 
         NSLayoutConstraint.activate([
@@ -118,6 +148,14 @@ class MainViewController : UIViewController {
             }
             strongSelf.ids = imgs
             strongSelf.collectionView?.reloadData()
+            strongSelf.updateSelectedId()
+        }) { (err) in
+
+        }
+
+        requestManager.getCurrentItem(successCallback: { (id) in
+            self.selected_id = id
+            self.updateSelectedId()
         }) { (err) in
 
         }
@@ -126,20 +164,102 @@ class MainViewController : UIViewController {
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
+
+//    func indexToId(index: Int) -> ImageID? {
+//
+//    }
+
+    func updateSelectedId() {
+        var i = 0
+
+        for image_id in ids {
+            if image_id == selected_id {
+                collectionView?.selectItem(at: IndexPath(item: i, section: 0), animated: true, scrollPosition: .centeredVertically)
+                break
+            }
+            i += 1
+        }
+    }
+
+    @objc func didLongPress(gest: UILongPressGestureRecognizer) {
+        let pos = gest.location(in: collectionView!)
+
+        if let indexPath = collectionView?.indexPathForItem(at: pos) {
+            let toRemove = ids[indexPath.item]
+            requestManager.deleteItemWithId(id: toRemove, successCallback: {
+                self.ids.remove(at: indexPath.item)
+                self.collectionView?.reloadData()
+            }) { (err) in
+                print("failed: \(err)")
+            }
+        }
+    }
+
+    @objc func addPhoto() {
+        let controller = UIImagePickerController()
+        controller.delegate = self
+        present(controller, animated: true, completion: nil)
+    }
+}
+
+extension MainViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        let filter = CIFilter.init(name: "CIPhotoEffectNoir")!
+        var image: UIImage?
+
+        if let chosenImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
+            image = chosenImage
+        } else if let chosenImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+            image = chosenImage
+        }
+
+        guard var choosenImage = image else {
+            return
+        }
+
+
+        filter.setValue(CIImage(image: choosenImage), forKey: kCIInputImageKey)
+        if let output = filter.outputImage {
+            let outputUIImage = UIImage.init(ciImage: output)
+            choosenImage = outputUIImage
+        }
+
+        picker.dismiss(animated: false, completion: nil)
+        let cropViewController = CropViewController(image: choosenImage)
+        cropViewController.delegate = self
+        cropViewController.aspectRatioPreset = CropViewControllerAspectRatioPreset.presetCustom
+        cropViewController.customAspectRatio = screenResolution
+        cropViewController.aspectRatioLockEnabled = true
+        self.present(cropViewController, animated: true, completion: nil)
+
+        return
+    }
+}
+
+extension MainViewController: CropViewControllerDelegate {
+    func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
+        cropViewController.dismiss(animated: false, completion: nil)
+
+        requestManager.uploadImage(image: image.blackAndWhite, successCallback: { [weak self] (image) in
+            guard let strongSelf = self else {
+                return
+            }
+            strongSelf.ids.append(image)
+            strongSelf.collectionView?.reloadData()
+            strongSelf.updateSelectedId()
+        }) { (err) in
+
+        }
+    }
 }
 
 extension MainViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if let cellView = collectionView.cellForItem(at: indexPath) as? ImageCell {
-            cellView.imageView.layer.borderColor = UIColor.white.cgColor
-            cellView.imageView.layer.borderWidth = 2
-            cellView.contentView.layer.shadowPath = UIBezierPath(rect: cellView.imageView.bounds).cgPath
-        }
-    }
+        selected_id = ids[indexPath.item]
+        requestManager.setCurrentItem(newSelection: ids[indexPath.item], successCallback: {
 
-    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        if let cellView = collectionView.cellForItem(at: indexPath) as? ImageCell {
-            cellView.imageView.layer.borderWidth = 0
+        }) { (err) in
+
         }
     }
 }
