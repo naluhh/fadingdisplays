@@ -22,4 +22,4 @@ else ()
 endif ()
 
 # Add executable target with source files listed in SOURCE_FILES variable
-add_executable(image_converter main.cpp ${LIBPNG_LINK_FLAGS})
+add_executable(image_converter main.c ${LIBPNG_LINK_FLAGS})
