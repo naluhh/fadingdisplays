@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.13)  # CMake version check
 project(simple_example C)               # Create project "simple_example"
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
 
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+find_package (Threads)
 # Add main.cpp file of project root directory as source file
 set(SOURCE_FILES main.c)
 
@@ -22,4 +28,4 @@ else ()
 endif ()
 
 # Add executable target with source files listed in SOURCE_FILES variable
-add_executable(image_converter main.c ${LIBPNG_LINK_FLAGS})
+add_executable(image_converter main.c ${LIBPNG_LINK_FLAGS} ${CMAKE_THREAD_LIBS_INIT})
