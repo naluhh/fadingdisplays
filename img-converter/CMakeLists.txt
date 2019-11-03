@@ -8,7 +8,6 @@ endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 find_package (Threads)
-# Add main.cpp file of project root directory as source file
 set(SOURCE_FILES main.c)
 
 # search for pkg-config
@@ -28,4 +27,4 @@ else ()
 endif ()
 
 # Add executable target with source files listed in SOURCE_FILES variable
-add_executable(image_converter main.c ${LIBPNG_LINK_FLAGS} ${CMAKE_THREAD_LIBS_INIT})
+add_executable(image_driver main.c ${LIBPNG_LINK_FLAGS} ${CMAKE_THREAD_LIBS_INIT})

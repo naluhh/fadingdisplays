@@ -4,6 +4,10 @@
 #include <string.h>
 #include <stdarg.h>
 #include <pthread.h>
+#include <sys/socket.h> //socket
+#include <arpa/inet.h> //inet_addr
+#include <unistd.h> // write(socket, message, strlen(message))
+#include <string.h> //strlen
 
 #include <png.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -25,10 +29,64 @@ void abort_(const char * s, ...)
 
 const int x_split = 2;
 const int y_split = 4;
+const int total_client = x_split * y_split;
 int target_width = 3744;
 int target_height = 5616;
 int splitted_w = 1872;
 int splitted_h = 1404;
+
+const char idx_to_ip[8][16] = {"127.0.0.1", "127.0.0.12", "127.0.0.12", "127.0.0.12", "127.0.0.12", "127.0.0.12", "127.0.0.12"}; // TODO: Replace by rasp ips
+
+typedef struct s_split_input {
+    int idx;
+    char *filename;
+    uint8_t *image;
+} t_split_input;
+
+
+int send_to_server(char *ip, uint16_t port, char *msg) {
+    //create a socket, returns -1 of error happened
+    /*
+     Address Family - AF_INET (this is IP version 4)
+     Type - SOCK_STREAM (this means connection oriented TCP protocol)
+     Protocol - 0 [ or IPPROTO_IP This is IP protocol]
+     */
+    int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+    if (socket_desc == -1) {
+        printf("Could not create a socket\n");
+    }
+
+    //create a server
+    struct sockaddr_in server;
+
+
+    server.sin_addr.s_addr = inet_addr(ip);
+    server.sin_family = AF_INET;
+    server.sin_port = htons(port); //specify the open port_number
+
+    //connect to the server
+    if (connect(socket_desc, (struct sockaddr*)&server, sizeof(server)) < 0) {
+        puts("Connect error\n");
+        return 1;
+    }
+    puts("Connected\n");
+
+    if (send(socket_desc, msg, strlen(msg), 0) < 0) {
+        puts("Send failed\n");
+        return 1;
+    }
+    puts("Data send\n");
+
+    //receive data from server
+    int received;
+    char received_data[16];
+    if ((received = recv(socket_desc, received_data, 16, 0)) <= 0) {
+        return 1;
+    }
+    close(socket_desc);
+    return strncmp(received_data, "OK", 2);
+}
+
 
 void write_png_file(char* file_name, uint8_t *image, int x_orig, int y_orig, int tar_width, int tar_height, int total_width, int total_height)
 {
@@ -184,100 +242,257 @@ void apply_dithering_16(uint8_t *image, int width, int height) {
     free(error);
 }
 
-void write_column(uint8_t *image, int column) {
-    int x_orig = 0;
-    int y_orig = (column * target_height / y_split);
-    char filename[12] = "out-?-?.png";
-    filename[4] = '0';
-    filename[6] = column + '0';
+void *send_img(void *input_struct) {
+    t_split_input *input = (t_split_input*)input_struct;
 
-    write_png_file(filename, image, x_orig, y_orig, splitted_w, splitted_h, target_width, target_height);
-    filename[4] = '1';
-    x_orig = splitted_w;
-    write_png_file(filename, image, x_orig, y_orig, splitted_w, splitted_h, target_width, target_height);
+    int len = strlen(input->filename) + 1;
+    char *filename = malloc(len + 10);
+    memcpy(filename, input->filename + 1, len);
+    filename[0] = 'S'; // Set Order
+    filename[len] = '-';
+    filename[len + 1] = input->idx + '0';
+    filename[len + 2] = 0;
+
+    send_to_server(idx_to_ip[input->idx], 8889, filename);
+
+    free(filename);
+
+    return NULL;
 }
 
-void *thread_1(void *image) {
-    write_column(image, 0);
-    pthread_exit(NULL);
+void *split_img(void *input_struct) {
+    t_split_input *input = (t_split_input*)input_struct;
+
+    int len = strlen(input->filename) + 1;
+    char *filename = malloc(len + 10);
+    memcpy(filename, input->filename + 1, len);
+    filename[0] = 'S'; // Set Order
+    filename[len + 1] = '-';
+    filename[len + 2] = input->idx + '0';
+    filename[len + 3] = 0;
+
+    int x_orig = input->idx % x_split * splitted_w;
+    int y_orig = (input->idx / x_split * target_height / y_split);
+
+    write_png_file(filename + 1, input->image, x_orig, y_orig, splitted_w, splitted_h, target_width, target_height);
+
+    send_to_server(idx_to_ip[input->idx], 8889, filename);
+
+    free(filename);
+
+    return NULL;
 }
 
-void *thread_2(void *image) {
-    write_column(image, 1);
-    pthread_exit(NULL);
+int check_if_parts_exist(char *filename) {
+    int len = strlen(filename);
+    char *part_filename = malloc(len + 10);
+    memcpy(part_filename, filename, len);
+    part_filename[len] = '-';
+    part_filename[len + 2] = 0;
+
+    for (int i = 0; i < 8; ++i) {
+        part_filename[len + 1] = i + '0';
+        if (fopen(part_filename, "r") == NULL) {
+            return 1;
+        }
+    }
+
+    free(part_filename);
+
+    return 0;
 }
 
-void *thread_3(void *image) {
-    write_column(image, 2);
-    pthread_exit(NULL);
+int set_image(char *filename) {
+    pthread_t threads[total_client];
+    t_split_input inputs[total_client];
+
+    int alread_generated = check_if_parts_exist(filename);
+    if (alread_generated) {
+        int width, height, channels;
+
+        uint8_t *image = stbi_load(filename,
+                                   &width,
+                                   &height,
+                                   &channels,
+                                   0);
+        printf("loaded \n");
+        if (image == NULL) {
+            printf("image loading failed\n");
+            return 1;
+        }
+
+        if (channels != 1) {
+            image = switch_to_bw(image, width, height, channels);
+            printf("switched to bw \n");
+            channels = 1;
+        }
+        //
+        if (height < width) {
+            image = rotate_90(image, width, height);
+            int old_width = width;
+
+            width = height;
+            height = old_width;
+        }
+        //
+        if (width != target_width || height != target_height) {
+            unsigned char *new_image = (unsigned char*)malloc(target_width * target_height * channels);
+
+            stbir_resize_uint8(image, width, height, 0,
+                               new_image, target_width, target_height, 0, channels);
+            printf("resized \n");
+            STBI_FREE(image);
+
+            image = new_image;
+        }
+
+        apply_dithering_16(image, target_width, target_height);
+        printf("dithered \n");
+
+        for (int i = 0; i < total_client; ++i) {
+            inputs[i].image = image;
+            inputs[i].idx = i;
+            inputs[i].filename = filename;
+
+            if (pthread_create(&threads[i], NULL, split_img, &inputs[i])) {
+                printf("failed to create threads\n");
+                return 1;
+            }
+        }
+    } else {
+        for (int i = 0; i < total_client; ++i) {
+            inputs[i].idx = i;
+            inputs[i].filename = filename;
+
+            if (pthread_create(&threads[i], NULL, send_img, &inputs[i])) {
+                printf("failed to create threads\n");
+                return 1;
+            }
+        }
+    }
+
+    for (int i = 0; i < total_client; ++i) {
+        pthread_join(threads[i], NULL);
+    }
+
+    return 0;
 }
 
-int main(int argc, char **argv)
-{
-    if (argc != 3)
-        abort_("Usage: program_name <file_in> <file_out>");
 
-    int width, height, channels;
+//connection handler
+void *connection_handler(void *socket_desc){
+    //get the socket descriptor
+    int sock = *(int*)socket_desc;
+    int read_size;
+    char *message, client_message[256];
+    //send some message to the client
 
-    uint8_t *image = stbi_load(argv[1],
-                                     &width,
-                                     &height,
-                                     &channels,
-                                     0);
+    //Receive a message from client
+    while ((read_size = recv(sock, client_message, 256, 0)) > 0 ){
+        //Send the message back to client
+        if (strncmp(client_message, "S", 1) == 0) {
+            char *filename = client_message + 1;
+            client_message[read_size] = 0;
+            printf("filename: %s", filename);
+            int error = set_image(filename);
+            write(sock, error ? "404" : "200", 3);
+            break;
+        } else if (strncmp(client_message, "D", 1) == 0) {
+            char *filename = client_message + 1;
+            client_message[read_size] = 0;
+            FILE *fp = fopen(filename, "r");
+            printf("Trying to open: %s", filename);
+            if (fp == NULL)
+            {
+                write(sock, "File not found", strlen("File not found"));
+                break;
+            }
+
+            char send_buffer[4096 * 4];
+
+            int file_read_size;
+            while ((file_read_size = fread(send_buffer, sizeof(char), 4096 * 4, fp))) {
+                printf("reading %d\n", file_read_size);
+                write(sock, send_buffer, file_read_size);
+            }
+
+            fclose(fp);
+            break;
+        }
+    }
+
+    if (read_size == 0){
+        puts("Client disconnected\n");
+    }
+    else if(read_size == -1){
+        perror("recv failed\n");
+    }
+
+    //Free the socket pointer
+    close(sock);
+    free(socket_desc);
+    return 0;
+}
 
 
-    printf("loaded \n");
-    if (image == NULL) {
-        printf("image loading failed\n");
+
+int main(int argc, char **argv) {
+    int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+    if (socket_desc == -1) {
+        printf("Could not create a socket\n");
+    }
+
+    //create a server
+    struct sockaddr_in server;
+
+    char *IP = "127.0.0.1";
+    unsigned short OPEN_PORT = 8888;
+
+    server.sin_addr.s_addr = inet_addr(IP);
+    server.sin_family = AF_INET;
+    server.sin_port = htons(OPEN_PORT); //specify the open port_number
+
+    if (bind(socket_desc, (struct sockaddr*)&server, sizeof(server)) < 0 ) {
+        printf("Bind failed\n");
         return 1;
     }
+    printf("Bind done\n");
 
-    if (channels != 1) {
-        image = switch_to_bw(image, width, height, channels);
-        printf("switched to bw \n");
-        channels = 1;
+    //listen for new connections:
+    listen(socket_desc, 5);
+    puts("Waiting for new connections...");
+
+    int c = sizeof(struct sockaddr_in);
+    //client to be connected
+    struct sockaddr_in client;
+    //new socket for client
+    int new_socket, *new_sock;
+    while ((new_socket = accept( socket_desc, (struct sockaddr*)&client, (socklen_t*)&c ))) {
+        puts("Connection accepted");
+        //get the IP address of a client
+        char *CLIENT_IP = inet_ntoa(client.sin_addr);
+        int CLIENT_PORT = ntohs(client.sin_port);
+        printf("       CLIENT = {%s:%d}\n", CLIENT_IP, CLIENT_PORT);
+        //reply to the client
+        char* message = "Hello, client! I have received your connection, now I will assign a handler for you!\n";
+        write(new_socket, message, strlen(message));
+
+        pthread_t sniffer_thread;
+        new_sock = malloc(1);
+        *new_sock = new_socket;
+
+        if (pthread_create(&sniffer_thread, NULL, connection_handler, (void*)new_sock) < 0  ){
+            perror("could not create thread");
+            return 1;
+        }
+        //Now join the thread , so that we dont terminate before the thread
+//        pthread_join( sniffer_thread , NULL);
+        puts("Handler assigned");
     }
-
-    if (height < width) {
-        image = rotate_90(image, width, height);
-        int old_width = width;
-
-        width = height;
-        height = old_width;
-    }
-
-    if (width != target_width || height != target_height) {
-        unsigned char *new_image = (unsigned char*)malloc(target_width * target_height * channels);
-
-        stbir_resize_uint8(image, width, height, 0,
-                           new_image, target_width, target_height, 0, channels);
-        printf("resized \n");
-        STBI_FREE(image);
-
-        image = new_image;
-    }
-
-
-    apply_dithering_16(image, target_width, target_height);
-    printf("dithered \n");
-
-
-//    stbi_write_png("test-out.png", target_width, target_height, 1, image, 0);
-    pthread_t thread1;
-    pthread_t thread2;
-    pthread_t thread3;
-
-    if (pthread_create(&thread1, NULL, thread_1, image) || pthread_create(&thread2, NULL, thread_2, image) || pthread_create(&thread3, NULL, thread_3, image)) {
-        printf("failed to create threads\n");
+    if (new_socket < 0 ) {
+        perror("Accept failed");
         return 1;
     }
-
-    write_column(image, 3);
-
-
-    pthread_join(thread1, NULL);
-    pthread_join(thread2, NULL);
-    pthread_join(thread3, NULL);
 
     return 0;
 }

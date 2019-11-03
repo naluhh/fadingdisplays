@@ -5,6 +5,7 @@ var app = express();
 const multer = require('multer');
 var fs = require('fs');
 var uniqid = require('uniqid');
+var net = require('net');
 var dbname = 'test.db';
 
 app.use(express['static'](__dirname));
@@ -54,7 +55,7 @@ app.get('/library', function(req, res) {
 });
 
 app.put('/current/:id', function(req, res) {
-    let request = 'SELECT ID id FROM LIBRARY WHERE ID = ?';
+    let request = 'SELECT ID id, FILENAME file FROM LIBRARY WHERE ID = ?';
     let db = new sqlite3.Database(dbname, (err) => {
 	if (err) {
 	    console.error(err.message);
@@ -69,18 +70,26 @@ app.put('/current/:id', function(req, res) {
 	    found = row ? true : false;
 	    if (found == false) {
 		res.status(400).send('image not in lib');
-	    } else {
+		} else {
+			const file = `${__dirname}/library/` + row.file;
 		var success = false;
 		let replace_request = 'UPDATE CURRENT_IMAGE SET IMAGE_ID = ? WHERE ID = 0';
 		
 		db.run(replace_request, [req.params.id], function(err){
 		    if (err) {
-			res.status(500).send('INTERNAL DB ERROR->' + err);
+				res.status(500).send('INTERNAL DB ERROR->' + err);
 		    }
 		
 		    success = err ? false : true;
 		    if (success) {
-			res.status(200).send({'selected_image': req.params.id});
+				res.status(200).send({ 'selected_image': req.params.id });
+				
+				
+				var client = new net.Socket();
+				client.connect(8888, '127.0.0.1', function () {
+					console.log('Connected');
+					client.write('S' + file);
+				});
 		    } else {
 			res.status(500).send('error while updating db' + err);
 		    }
@@ -224,6 +233,7 @@ app.get('/library/:id', function(req, res) {
 				res.status(400).send('image not in lib');
 			} else {
 				const file = `${__dirname}/library/` + row.file;
+
 				res.download(file);
 			}
 		});
