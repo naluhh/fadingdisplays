@@ -282,7 +282,7 @@ void *split_img(void *input_struct) {
 
 
     char filename[256];
-    snprintf(filename, 256, "D%s-%d", input->filename, input->idx);
+    snprintf(filename, 256, "U%s-%d", input->filename, input->idx);
 
 
     int x_orig = input->idx % x_split * splitted_w;
