@@ -246,17 +246,11 @@ void apply_dithering_16(uint8_t *image, int width, int height) {
 void *send_img(void *input_struct) {
     t_split_input *input = (t_split_input*)input_struct;
 
-    int len = strlen(input->filename) + 1;
-    char *filename = malloc(len + 10);
-    memcpy(input->filename + 1, filename, len);
-    filename[0] = 'S'; // Set Order
-    filename[len] = '-';
-    filename[len + 1] = input->idx + '0';
-    filename[len + 2] = 0;
+    char filename[256];
+    snprintf(filename, 256, "S%s-%d", input->filename, input->idx);
 
     send_to_server(idx_to_ip[input->idx], 8889, filename);
 
-    free(filename);
 
     return NULL;
 }
@@ -264,13 +258,10 @@ void *send_img(void *input_struct) {
 void *split_img(void *input_struct) {
     t_split_input *input = (t_split_input*)input_struct;
 
-    int len = strlen(input->filename) + 1;
-    char *filename = malloc(len + 10);
-    memcpy(input->filename + 1, filename, len);
-    filename[0] = 'S'; // Set Order
-    filename[len + 1] = '-';
-    filename[len + 2] = input->idx + '0';
-    filename[len + 3] = 0;
+
+    char filename[256];
+    snprintf(filename, 256, "S%s-%d", input->filename, input->idx);
+
 
     int x_orig = input->idx % x_split * splitted_w;
     int y_orig = (input->idx / x_split * target_height / y_split);
@@ -278,8 +269,6 @@ void *split_img(void *input_struct) {
     write_png_file(filename + 1, input->image, x_orig, y_orig, splitted_w, splitted_h, target_width, target_height);
 
     send_to_server(idx_to_ip[input->idx], 8889, filename);
-
-    free(filename);
 
     return NULL;
 }
