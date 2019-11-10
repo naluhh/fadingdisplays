@@ -36,7 +36,7 @@ int target_height = 5616;
 int splitted_w = 1872;
 int splitted_h = 1404;
 
-const char idx_to_ip[8][16] = {"127.0.0.1", "127.0.0.12", "127.0.0.12", "127.0.0.12", "127.0.0.12", "127.0.0.12", "127.0.0.12"}; // TODO: Replace by rasp ips
+const char idx_to_ip[8][16] = {"192.168.86.24", "192.168.86.24", "192.168.86.24", "192.168.86.24", "192.168.86.24", "192.168.86.24", "192.168.86.24"}; // TODO: Replace by rasp ips
 
 typedef struct s_split_input {
     int idx;
@@ -80,12 +80,33 @@ int send_to_server(char *ip, uint16_t port, char *msg) {
 
     //receive data from server
     int received;
-    char received_data[16];
-    if ((received = recv(socket_desc, received_data, 16, 0)) <= 0) {
-        return 1;
+    char received_data[256];
+    while ((received = recv(socket_desc, received_data, 256, 0)) > 0) {
+        if (strncmp(received_data, "D", 1) == 0) {
+            char *filename = received_data + 1;
+            received_data[received] = 0;
+            FILE *fp = fopen(filename, "r");
+            printf("Trying to open: %s", filename);
+            if (fp == NULL)
+            {
+                write(socket_desc, "File not found", strlen("File not found"));
+                break;
+            }
+
+            char send_buffer[4096 * 4];
+
+            int file_read_size;
+            while ((file_read_size = fread(send_buffer, sizeof(char), 4096 * 4, fp))) {
+                printf("reading %d\n", file_read_size);
+                write(socket_desc, send_buffer, file_read_size);
+            }
+
+            fclose(fp);
+            break;
+        }
     }
     close(socket_desc);
-    return strncmp(received_data, "OK", 2);
+    return 0;
 }
 
 
@@ -247,10 +268,11 @@ void *send_img(void *input_struct) {
     t_split_input *input = (t_split_input*)input_struct;
 
     char filename[256];
-    snprintf(filename, 256, "S%s-%d", input->filename, input->idx);
+    snprintf(filename, 256, "D%s-%d", input->filename, input->idx);
 
-    send_to_server(idx_to_ip[input->idx], 8889, filename);
-
+    if (input->idx == 0) {
+        send_to_server(idx_to_ip[input->idx], 8889, filename);
+    }
 
     return NULL;
 }
@@ -260,7 +282,7 @@ void *split_img(void *input_struct) {
 
 
     char filename[256];
-    snprintf(filename, 256, "S%s-%d", input->filename, input->idx);
+    snprintf(filename, 256, "D%s-%d", input->filename, input->idx);
 
 
     int x_orig = input->idx % x_split * splitted_w;
@@ -268,27 +290,25 @@ void *split_img(void *input_struct) {
 
     write_png_file(filename + 1, input->image, x_orig, y_orig, splitted_w, splitted_h, target_width, target_height);
 
-    send_to_server(idx_to_ip[input->idx], 8889, filename);
+    if (input->idx == 0) {
+        send_to_server(idx_to_ip[input->idx], 8889, filename);
+    }
 
     return NULL;
 }
 
 int check_if_parts_exist(char *filename) {
-    int len = strlen(filename);
-    char *part_filename = malloc(len + 10);
-    memcpy(part_filename, filename, len);
-    part_filename[len] = '-';
-    part_filename[len + 2] = 0;
+    char part_filename[256];
+
 
     for (int i = 0; i < 8; ++i) {
-        part_filename[len + 1] = i + '0';
+        snprintf(part_filename, 256, "%s-%d", filename, i);
         if (fopen(part_filename, "r") == NULL) {
             return 1;
         }
     }
 
-    free(part_filename);
-
+    printf("No need to generate, all parts already exists\n");
     return 0;
 }
 
