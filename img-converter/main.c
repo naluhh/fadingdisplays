@@ -447,7 +447,7 @@ int main(int argc, char **argv) {
     struct sockaddr_in server;
 
     char *IP = "127.0.0.1";
-    unsigned short OPEN_PORT = 8888;
+    unsigned short OPEN_PORT = 8889;
 
     server.sin_addr.s_addr = inet_addr(IP);
     server.sin_family = AF_INET;

@@ -62,43 +62,46 @@ app.put('/current/:id', function(req, res) {
 	}
     });
     try {
-	var found = false;
-	db.get(request, [req.params.id], (err, row) => {
-	    if (err) {
-		res.status(500).send('INTERNAL DB ERROR->' + err);
-	    }
-	    found = row ? true : false;
-	    if (found == false) {
-		res.status(400).send('image not in lib');
-		} else {
-			const file = `${__dirname}/library/` + row.file;
-		var success = false;
-		let replace_request = 'UPDATE CURRENT_IMAGE SET IMAGE_ID = ? WHERE ID = 0';
-		
-		db.run(replace_request, [req.params.id], function(err){
-		    if (err) {
+		var found = false;
+		db.get(request, [req.params.id], (err, row) => {
+			if (err) {
 				res.status(500).send('INTERNAL DB ERROR->' + err);
-		    }
-		
-		    success = err ? false : true;
-		    if (success) {
-				res.status(200).send({ 'selected_image': req.params.id });
-				
-				
-				var client = new net.Socket();
-				client.connect(8888, '127.0.0.1', function () {
-					console.log('Connected');
-					client.write('S' + file);
+			}
+			found = row ? true : false;
+			if (found == false) {
+				res.status(400).send('image not in lib');
+			} else {
+				const file = `${__dirname}/library/` + row.file;
+				var success = false;
+				let replace_request = 'UPDATE CURRENT_IMAGE SET IMAGE_ID = ? WHERE ID = 0';
+			
+				db.run(replace_request, [req.params.id], function(err){
+					if (err) {
+						res.status(500).send('INTERNAL DB ERROR->' + err);
+					}
+			
+					success = err ? false : true;
+					if (success) {
+						res.status(200).send({ 'selected_image': req.params.id });
+					
+					
+						var client = new net.Socket();
+						client.connect(8889, 'localhost', function () {
+							console.log('Connected');
+							client.write('S' + file);
+						});
+						client.on('close', function() {
+							console.log('Connection closed');
+						});
+					} else {
+						res.status(500).send('error while updating db' + err);
+					}
 				});
-		    } else {
-			res.status(500).send('error while updating db' + err);
-		    }
+			}
 		});
-	    }
-	});
-    } catch (err) {
-	res.status(500).send('OOPS' + err);
-    }
+	} catch (err) {
+		res.status(500).send('OOPS' + err);
+	}
     db.close();
 })
 
