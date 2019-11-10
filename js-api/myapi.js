@@ -117,7 +117,7 @@ var storage = multer.diskStorage({
 
 var upload = multer({ storage: storage });
 
-app.post('/library', upload.single('picture'),  function(req, res, next){
+app.post('/libraryp', upload.single('picture'),  function(req, res, next){
     const file = req.file
     if (!file) {
 	const error = new Error('Please upload a file');
