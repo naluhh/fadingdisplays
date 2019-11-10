@@ -36,7 +36,7 @@ int target_height = 5616;
 int splitted_w = 1872;
 int splitted_h = 1404;
 
-const char idx_to_ip[8][16] = {"192.168.86.24", "192.168.86.24", "192.168.86.24", "192.168.86.24", "192.168.86.24", "192.168.86.24", "192.168.86.24"}; // TODO: Replace by rasp ips
+const char idx_to_ip[8][16] = {"192.168.86.25", "192.168.86.24", "192.168.86.24", "192.168.86.24", "192.168.86.24", "192.168.86.24", "192.168.86.24"}; // TODO: Replace by rasp ips
 
 typedef struct s_split_input {
     int idx;
