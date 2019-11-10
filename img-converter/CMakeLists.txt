@@ -28,4 +28,4 @@ endif ()
 
 # Add executable target with source files listed in SOURCE_FILES variable
 add_executable(image_driver main.c ${LIBPNG_LINK_FLAGS} )
-target_link_libraries (image_driver ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (image_driver ${CMAKE_THREAD_LIBS_INIT} m)
