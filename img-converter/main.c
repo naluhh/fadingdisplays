@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <pthread.h>
 #include <sys/socket.h> //socket
+#include <netinet/in.h>
 #include <arpa/inet.h> //inet_addr
 #include <unistd.h> // write(socket, message, strlen(message))
 #include <string.h> //strlen
