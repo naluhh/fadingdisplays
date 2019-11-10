@@ -248,7 +248,7 @@ void *send_img(void *input_struct) {
 
     int len = strlen(input->filename) + 1;
     char *filename = malloc(len + 10);
-    memcpy(filename, input->filename + 1, len);
+    memcpy(input->filename + 1, filename, len);
     filename[0] = 'S'; // Set Order
     filename[len] = '-';
     filename[len + 1] = input->idx + '0';
@@ -266,7 +266,7 @@ void *split_img(void *input_struct) {
 
     int len = strlen(input->filename) + 1;
     char *filename = malloc(len + 10);
-    memcpy(filename, input->filename + 1, len);
+    memcpy(input->filename + 1, filename, len);
     filename[0] = 'S'; // Set Order
     filename[len + 1] = '-';
     filename[len + 2] = input->idx + '0';
