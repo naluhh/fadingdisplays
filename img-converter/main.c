@@ -36,7 +36,10 @@ int target_height = 5616;
 int splitted_w = 1872;
 int splitted_h = 1404;
 
-const char idx_to_ip[8][16] = {"192.168.86.25", "192.168.86.25", "192.168.86.25", "192.168.86.25", "192.168.86.25", "192.168.86.25", "192.168.86.25"}; // TODO: Replace by rasp ips
+const char idx_to_ip[8][16] = {"192.168.86.45", "192.168.86.25",
+                               "192.168.86.44", "192.168.86.43",
+                               "192.168.86.38", "192.168.86.45",
+                               "192.168.86.29", "192.168.86.36"}; // TODO: Replace by rasp ips
 
 typedef struct s_split_input {
     int idx;
@@ -65,12 +68,13 @@ int send_to_server(char *ip, uint16_t port, char *msg) {
     server.sin_family = AF_INET;
     server.sin_port = htons(port); //specify the open port_number
 
+    printf("trying to connect %s\n", ip);
     //connect to the server
     if (connect(socket_desc, (struct sockaddr*)&server, sizeof(server)) < 0) {
-        puts("Connect error\n");
+        printf("Connect error : %s\n", ip);
         return 1;
     }
-    puts("Connected\n");
+    printf("Connected %s\n", ip);
 
     if (send(socket_desc, msg, strlen(msg), 0) < 0) {
         puts("Send failed\n");
@@ -97,7 +101,7 @@ int send_to_server(char *ip, uint16_t port, char *msg) {
 
             int file_read_size;
             while ((file_read_size = fread(send_buffer, sizeof(char), 4096 * 4, fp))) {
-                printf("reading %d\n", file_read_size);
+//                printf("reading %d\n", file_read_size);
                 write(socket_desc, send_buffer, file_read_size);
             }
 
@@ -270,8 +274,8 @@ void *send_img(void *input_struct) {
     char filename[256];
     snprintf(filename, 256, "U%s-%d", input->filename, input->idx);
 
-    if (input->idx == 0) {
-        send_to_server(idx_to_ip[input->idx], 8889, filename);
+    if (input->idx > 1) {
+        send_to_server(idx_to_ip[input->idx], 8888, filename);
     }
 
     return NULL;
@@ -290,8 +294,8 @@ void *split_img(void *input_struct) {
 
     write_png_file(filename + 1, input->image, x_orig, y_orig, splitted_w, splitted_h, target_width, target_height);
 
-    if (input->idx == 0) {
-        send_to_server(idx_to_ip[input->idx], 8889, filename);
+    if (input->idx > 1) {
+        send_to_server(idx_to_ip[input->idx], 8888, filename);
     }
 
     return NULL;
@@ -444,9 +448,7 @@ void *connection_handler(void *socket_desc){
     return 0;
 }
 
-
-
-int main(int argc, char **argv) {
+int start_server() {
     int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_desc == -1) {
         printf("Could not create a socket\n");
@@ -469,7 +471,7 @@ int main(int argc, char **argv) {
     printf("Bind done\n");
 
     //listen for new connections:
-    listen(socket_desc, 5);
+    listen(socket_desc, 12);
     puts("Waiting for new connections...");
 
     int c = sizeof(struct sockaddr_in);
@@ -496,7 +498,7 @@ int main(int argc, char **argv) {
             return 1;
         }
         //Now join the thread , so that we dont terminate before the thread
-//        pthread_join( sniffer_thread , NULL);
+        //        pthread_join( sniffer_thread , NULL);
         puts("Handler assigned");
     }
     if (new_socket < 0 ) {
@@ -504,5 +506,13 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    return 0;
+}
+
+int main(int argc, char **argv) {
+    while (1) {
+        start_server();
+        sleep(1);
+    }
     return 0;
 }
