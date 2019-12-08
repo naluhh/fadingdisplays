@@ -36,9 +36,9 @@ int target_height = 5616;
 int splitted_w = 1872;
 int splitted_h = 1404;
 
-const char idx_to_ip[8][16] = {"192.168.86.45", "192.168.86.25",
-                               "192.168.86.44", "192.168.86.43",
-                               "192.168.86.38", "192.168.86.45",
+const char idx_to_ip[8][16] = {"192.168.86.21", "192.168.86.25",
+                               "192.168.86.43", "192.168.86.25",
+                               "192.168.86.38", "192.168.86.21",
                                "192.168.86.29", "192.168.86.36"}; // TODO: Replace by rasp ips
 
 typedef struct s_split_input {
@@ -46,6 +46,56 @@ typedef struct s_split_input {
     char *filename;
     uint8_t *image;
 } t_split_input;
+
+char *delim_token = "||";
+
+void free_cmd_list(char **cmds) {
+    int i = 0;
+
+    while (cmds[i]) {
+        free(cmds[i]);
+        ++i;
+    }
+    free(cmds);
+}
+
+char **get_next_command(char buffer[512], int *total_length) {
+  int start = -1;
+  int end = -1;
+  unsigned long delim_token_length = strlen(delim_token);
+  char **re = NULL;
+  int cmd_index = 0;
+
+    for (int i = 0; i <= *total_length - delim_token_length; ++i) {
+        if (!strncmp(&buffer[i], delim_token, delim_token_length)) {
+            if (start == -1 || i - start < delim_token_length) {
+                start = i;
+                i += delim_token_length;
+            } else {
+                end = i + delim_token_length;
+
+                if (re == NULL) {
+                    re = (char**)malloc(sizeof(char*) * 10);
+                }
+
+                int cmd_length = end - start - 4;
+                char *cmd = malloc((cmd_length + 1) * sizeof(char*));
+                cmd[cmd_length] = '\0';
+                memcpy(cmd, &buffer[0] + start + 2, end - 4 - start);
+                re[cmd_index++] = cmd;
+                start = -1;
+            }
+        }
+    }
+
+  if (re) {
+    memcpy(&buffer[0], &buffer[end], *total_length - end);
+    *total_length = *total_length - end;
+
+    re[cmd_index] = NULL;
+  }
+  return re;
+}
 
 
 int send_to_server(char *ip, uint16_t port, char *msg) {
@@ -84,11 +134,20 @@ int send_to_server(char *ip, uint16_t port, char *msg) {
 
     //receive data from server
     int received;
-    char received_data[256];
-    while ((received = recv(socket_desc, received_data, 256, 0)) > 0) {
-        if (strncmp(received_data, "D", 1) == 0) {
-            char *filename = received_data + 1;
-            received_data[received] = 0;
+    char received_data[512];
+    int index = 0;
+    while ((received = recv(socket_desc, received_data + index, 512 - index, 0)) > 0) {
+        index += received;
+        char **commands = get_next_command(received_data, &index);
+
+        if (!commands) {
+            printf("is not a command\n");
+            continue;
+        }
+        int i = 0;
+        char *command = commands[0];
+        if (strncmp(command, "D", 1) == 0) {
+            char *filename = command + 1;
             FILE *fp = fopen(filename, "r");
             printf("Trying to open: %s", filename);
             if (fp == NULL)
@@ -101,13 +160,15 @@ int send_to_server(char *ip, uint16_t port, char *msg) {
 
             int file_read_size;
             while ((file_read_size = fread(send_buffer, sizeof(char), 4096 * 4, fp))) {
-//                printf("reading %d\n", file_read_size);
                 write(socket_desc, send_buffer, file_read_size);
             }
 
             fclose(fp);
+            free_cmd_list(commands);
             break;
         }
+
+        free_cmd_list(commands);
     }
     close(socket_desc);
     return 0;
@@ -271,11 +332,11 @@ void apply_dithering_16(uint8_t *image, int width, int height) {
 void *send_img(void *input_struct) {
     t_split_input *input = (t_split_input*)input_struct;
 
-    char filename[256];
-    snprintf(filename, 256, "U%s-%d", input->filename, input->idx);
-
     if (input->idx > 1) {
-        send_to_server(idx_to_ip[input->idx], 8888, filename);
+        char filename[256];
+        snprintf(filename, 256, "U%s-%d", input->filename, input->idx);
+
+        send_to_server((char*)idx_to_ip[input->idx], 8888, filename);
     }
 
     return NULL;
@@ -284,18 +345,18 @@ void *send_img(void *input_struct) {
 void *split_img(void *input_struct) {
     t_split_input *input = (t_split_input*)input_struct;
 
-
-    char filename[256];
-    snprintf(filename, 256, "U%s-%d", input->filename, input->idx);
-
-
-    int x_orig = input->idx % x_split * splitted_w;
-    int y_orig = (input->idx / x_split * target_height / y_split);
-
-    write_png_file(filename + 1, input->image, x_orig, y_orig, splitted_w, splitted_h, target_width, target_height);
-
     if (input->idx > 1) {
-        send_to_server(idx_to_ip[input->idx], 8888, filename);
+        char filename[256];
+        snprintf(filename, 256, "U%s-%d", input->filename, input->idx);
+
+
+        int x_orig = input->idx % x_split * splitted_w;
+        int y_orig = (input->idx / x_split * target_height / y_split);
+
+        write_png_file(filename + 1, input->image, x_orig, y_orig, splitted_w, splitted_h, target_width, target_height);
+
+
+        send_to_server((char*)idx_to_ip[input->idx], 8888, filename);
     }
 
     return NULL;
@@ -386,8 +447,10 @@ int set_image(char *filename) {
     }
 
     for (int i = 0; i < total_client; ++i) {
+        printf("join on %d\n", inputs[i].idx);
         pthread_join(threads[i], NULL);
     }
+    printf("waiting finished");
 
     return 0;
 }
@@ -397,48 +460,60 @@ int set_image(char *filename) {
 void *connection_handler(void *socket_desc){
     //get the socket descriptor
     int sock = *(int*)socket_desc;
-    int read_size;
-    char *message, client_message[256];
+    int received;
+    char *message, received_data[512];
     //send some message to the client
 
     //Receive a message from client
-    while ((read_size = recv(sock, client_message, 256, 0)) > 0 ){
-        //Send the message back to client
-        if (strncmp(client_message, "S", 1) == 0) {
-            char *filename = client_message + 1;
-            client_message[read_size] = 0;
-            printf("filename: %s", filename);
-            int error = set_image(filename);
-            write(sock, error ? "404" : "200", 3);
-            break;
-        } else if (strncmp(client_message, "D", 1) == 0) {
-            char *filename = client_message + 1;
-            client_message[read_size] = 0;
-            FILE *fp = fopen(filename, "r");
-            printf("Trying to open: %s", filename);
-            if (fp == NULL)
-            {
-                write(sock, "File not found", strlen("File not found"));
-                break;
-            }
+    int index = 0;
+    while ((received = recv(sock, received_data + index, 512 - index, 0)) > 0) {
+        index += received;
+        char **commands = get_next_command(received_data, &index);
 
-            char send_buffer[4096 * 4];
-
-            int file_read_size;
-            while ((file_read_size = fread(send_buffer, sizeof(char), 4096 * 4, fp))) {
-                printf("reading %d\n", file_read_size);
-                write(sock, send_buffer, file_read_size);
-            }
-
-            fclose(fp);
-            break;
+        if (!commands) {
+            continue;
         }
+        int i = 0;
+        while (commands[i]) {
+            char *command = commands[i++];
+
+            if (strncmp(command, "S", 1) == 0) {
+                char *filename = command + 1;
+                printf("filename: %s\n", filename);
+                int error = set_image(filename);
+                write(sock, error ? "404" : "200", 3);
+            } else if (strncmp(command, "D", 1) == 0) {
+                char *filename = command + 1;
+                FILE *fp = fopen(filename, "r");
+                printf("Trying to open: %s\n", filename);
+                if (fp == NULL)
+                {
+                    write(sock, "File not found", strlen("File not found"));
+                    continue;
+                }
+
+                char send_buffer[4096 * 4];
+
+                int file_read_size;
+                while ((file_read_size = fread(send_buffer, sizeof(char), 4096 * 4, fp))) {
+                    printf("reading %d\n", file_read_size);
+                    write(sock, send_buffer, file_read_size);
+                }
+
+                fclose(fp);
+                close(sock);
+                free(socket_desc);
+                free_cmd_list(commands);
+                return 0;
+            }
+        }
+        free_cmd_list(commands);
     }
 
-    if (read_size == 0){
+    if (received == 0){
         puts("Client disconnected\n");
     }
-    else if(read_size == -1){
+    else if (received == -1){
         perror("recv failed\n");
     }
 

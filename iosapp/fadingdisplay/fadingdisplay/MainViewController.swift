@@ -240,7 +240,7 @@ extension MainViewController: CropViewControllerDelegate {
     func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
         cropViewController.dismiss(animated: false, completion: nil)
 
-        requestManager.uploadImage(image: image.blackAndWhite, successCallback: { [weak self] (image) in
+        requestManager.uploadImage(image: image.convertToCG, successCallback: { [weak self] (image) in
             guard let strongSelf = self else {
                 return
             }

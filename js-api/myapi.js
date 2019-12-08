@@ -10,6 +10,14 @@ var dbname = 'test.db';
 
 app.use(express['static'](__dirname));
 
+var client = new net.Socket();
+client.connect(8889, 'localhost', function () {
+	console.log('Connected');
+});
+client.on('close', function() {
+	console.log('Connection closed');
+});
+
 app.get('/current', function(req, res) {
     let db = new sqlite3.Database(dbname, (err) => {
 	if (err) {
@@ -84,15 +92,7 @@ app.put('/current/:id', function(req, res) {
 					if (success) {
 						res.status(200).send({ 'selected_image': req.params.id });
 					
-					
-						var client = new net.Socket();
-						client.connect(8889, 'localhost', function () {
-							console.log('Connected');
-							client.write('S' + file);
-						});
-						client.on('close', function() {
-							console.log('Connection closed');
-						});
+						client.write('||S' + file + "||");
 					} else {
 						res.status(500).send('error while updating db' + err);
 					}
