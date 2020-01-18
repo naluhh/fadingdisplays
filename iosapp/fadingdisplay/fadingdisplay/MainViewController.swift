@@ -184,6 +184,9 @@ class MainViewController : UIViewController {
     @objc func didLongPress(gest: UILongPressGestureRecognizer) {
         let pos = gest.location(in: collectionView!)
 
+        if (gest.state != .recognized) {
+            return;
+        }
         if let indexPath = collectionView?.indexPathForItem(at: pos) {
             let toRemove = ids[indexPath.item]
             requestManager.deleteItemWithId(id: toRemove, successCallback: {

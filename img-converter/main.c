@@ -36,7 +36,7 @@ int target_height = 5616;
 int splitted_w = 1872;
 int splitted_h = 1404;
 
-const char idx_to_ip[8][16] = {"192.168.86.21", "192.168.86.25",
+const char idx_to_ip[8][16] = {"192.168.86.46", "192.168.86.249", // bottom right, top right
                                "192.168.86.43", "192.168.86.25",
                                "192.168.86.38", "192.168.86.21",
                                "192.168.86.29", "192.168.86.36"}; // TODO: Replace by rasp ips
@@ -332,12 +332,10 @@ void apply_dithering_16(uint8_t *image, int width, int height) {
 void *send_img(void *input_struct) {
     t_split_input *input = (t_split_input*)input_struct;
 
-    if (input->idx > 1) {
-        char filename[256];
-        snprintf(filename, 256, "U%s-%d", input->filename, input->idx);
+    char filename[256];
+    snprintf(filename, 256, "U%s-%d", input->filename, input->idx);
 
-        send_to_server((char*)idx_to_ip[input->idx], 8888, filename);
-    }
+    send_to_server((char*)idx_to_ip[input->idx], 8888, filename);
 
     return NULL;
 }
@@ -345,19 +343,17 @@ void *send_img(void *input_struct) {
 void *split_img(void *input_struct) {
     t_split_input *input = (t_split_input*)input_struct;
 
-    if (input->idx > 1) {
-        char filename[256];
-        snprintf(filename, 256, "U%s-%d", input->filename, input->idx);
+    char filename[256];
+    snprintf(filename, 256, "U%s-%d", input->filename, input->idx);
 
 
-        int x_orig = input->idx % x_split * splitted_w;
-        int y_orig = (input->idx / x_split * target_height / y_split);
+    int x_orig = input->idx % x_split * splitted_w;
+    int y_orig = (input->idx / x_split * target_height / y_split);
 
-        write_png_file(filename + 1, input->image, x_orig, y_orig, splitted_w, splitted_h, target_width, target_height);
+    write_png_file(filename + 1, input->image, x_orig, y_orig, splitted_w, splitted_h, target_width, target_height);
 
 
-        send_to_server((char*)idx_to_ip[input->idx], 8888, filename);
-    }
+    send_to_server((char*)idx_to_ip[input->idx], 8888, filename);
 
     return NULL;
 }
