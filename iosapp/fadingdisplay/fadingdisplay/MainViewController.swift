@@ -9,7 +9,8 @@
 import UIKit
 import CoreImage
 
-let screenResolution = CGSize.init(width: 5616, height: 3744)
+//let screenResolution = CGSize.init(width: 5616, height: 3744) // Resolution without padding.
+let screenResolution = CGSize.init(width: 5616 + 100 * 3, height: 3744 + 80) // Resolution without padding.
 
 class ImageCell: UICollectionViewCell {
     static let reuseIdentifier = "ImageCell"
@@ -64,7 +65,7 @@ class ImageCell: UICollectionViewCell {
 }
 
 class MainViewController : UIViewController {
-    let aspectRatio: CGFloat = 3.0/2.0
+    let aspectRatio: CGFloat = screenResolution.width / screenResolution.height
     var collectionViewLayout: UICollectionViewFlowLayout?
     var collectionView: UICollectionView?
     let addButton = UIButton()
@@ -207,7 +208,7 @@ class MainViewController : UIViewController {
 
 extension MainViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        let filter = CIFilter.init(name: "CIPhotoEffectNoir")!
+        let filter = MetalFilter()
         var image: UIImage?
 
         if let chosenImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
@@ -221,8 +222,8 @@ extension MainViewController: UIImagePickerControllerDelegate, UINavigationContr
         }
 
 
-        filter.setValue(CIImage(image: choosenImage), forKey: kCIInputImageKey)
-        if let output = filter.outputImage {
+        filter.inputImage = CIImage(image: choosenImage)
+        if let output = filter.outputImage() {
             let outputUIImage = UIImage.init(ciImage: output)
             choosenImage = outputUIImage
         }

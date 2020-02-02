@@ -17,6 +17,7 @@
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
 #include "stb/stb_image_resize.h"
+#define ABS(x) ((x) < 0 ? -(x) : (x))
 
 void abort_(const char * s, ...)
 {
@@ -31,10 +32,17 @@ void abort_(const char * s, ...)
 const int x_split = 2;
 const int y_split = 4;
 const int total_client = x_split * y_split;
-int target_width = 3744;
-int target_height = 5616;
-int splitted_w = 1872;
-int splitted_h = 1404;
+const int h_padding = 100;
+const int v_padding = 80;
+const int target_width = 3744;
+const int target_height = 5616;
+const float target_width_f = target_width;
+const float target_height_f = target_height;
+const float no_padding_ratio = target_height_f / target_width_f;
+const int target_width_with_padding = target_width + (x_split - 1) * h_padding;
+const int target_height_with_padding = target_height + (y_split - 1) * v_padding;
+const int splitted_w = 1872;
+const int splitted_h = 1404;
 
 const char idx_to_ip[8][16] = {"192.168.86.46", "192.168.86.249", // bottom right, top right
                                "192.168.86.43", "192.168.86.25",
@@ -45,6 +53,9 @@ typedef struct s_split_input {
     int idx;
     char *filename;
     uint8_t *image;
+    int apply_padding;
+    int target_width;
+    int target_height;
 } t_split_input;
 
 char *delim_token = "||";
@@ -303,26 +314,31 @@ void apply_dithering_16(uint8_t *image, int width, int height) {
             int origin_idx = (y * width + x);
             int dest_idx = pixel_idx;
 
-            float err = 0.f;
+            float sum = image[origin_idx] + error[x];
 
-            if (x > 0) {
-                err += error[x + width - 1] * 0.5;
-            }
-            if (y > 0) {
-                err += error[x] * 0.5;
-            }
-
-            float sum = image[origin_idx] + err;
-
-            if (sum > 255.0) {
-                sum = 255.0;
-            }
+//            if (sum > 255.0) {
+//                sum = 255.0;
+//            }
 
             int target_v = (sum + 0.5) / 16.0;
             int target = target_v * 16;
 
-            error[x + width] = (sum - target);
+            float err = (sum - target);
+
             image[dest_idx] = (uint8_t)target;
+
+            if (x < width - 1) {
+                error[x + 1] += 7.0/16.0 * err;
+            }
+            if (y < height - 1 && x > 0) {
+                error[x - 1 + width] += 3.0/16 * err;
+            }
+            if (y < height - 1) {
+                error[x + width] += 5.0/16.0 * err;
+            }
+            if (x < width - 1 && y < height - 1) {
+                error[x + width + 1] += 1.0/16.0 * err;
+            }
         }
     }
 
@@ -347,10 +363,18 @@ void *split_img(void *input_struct) {
     snprintf(filename, 256, "U%s-%d", input->filename, input->idx);
 
 
-    int x_orig = input->idx % x_split * splitted_w;
-    int y_orig = (input->idx / x_split * target_height / y_split);
+    int x_idx = input->idx % x_split;
+    int y_idx = input->idx / x_split;
 
-    write_png_file(filename + 1, input->image, x_orig, y_orig, splitted_w, splitted_h, target_width, target_height);
+    int x_orig = x_idx * splitted_w;
+    int y_orig = y_idx * splitted_h;
+
+    if (input->apply_padding) {
+        x_orig += x_idx * v_padding;
+        y_orig += y_idx * h_padding;
+    }
+
+    write_png_file(filename + 1, input->image, x_orig, y_orig, splitted_w, splitted_h, input->target_width, input->target_height);
 
 
     send_to_server((char*)idx_to_ip[input->idx], 8888, filename);
@@ -386,7 +410,12 @@ int set_image(char *filename) {
                                    &height,
                                    &channels,
                                    0);
-        printf("loaded \n");
+        float ratio = width / (float)height;
+        int should_apply_paddings = ABS(ratio - no_padding_ratio) > 0.01;
+        int computed_width = should_apply_paddings ? target_width_with_padding : target_width;
+        int computed_height = should_apply_paddings ? target_height_with_padding : target_height;
+
+        printf("loaded with padding: %d  ratio is %f, delta is %f \n", should_apply_paddings, ratio, ABS(ratio - no_padding_ratio));
         if (image == NULL) {
             printf("image loading failed\n");
             return 1;
@@ -397,7 +426,7 @@ int set_image(char *filename) {
             printf("switched to bw \n");
             channels = 1;
         }
-        //
+
         if (height < width) {
             image = rotate_90(image, width, height);
             int old_width = width;
@@ -405,25 +434,28 @@ int set_image(char *filename) {
             width = height;
             height = old_width;
         }
-        //
-        if (width != target_width || height != target_height) {
-            unsigned char *new_image = (unsigned char*)malloc(target_width * target_height * channels);
+
+        if (width != computed_width || height != computed_height) {
+            unsigned char *new_image = (unsigned char*)malloc(computed_width * computed_height * channels);
 
             stbir_resize_uint8(image, width, height, 0,
-                               new_image, target_width, target_height, 0, channels);
+                               new_image, computed_width, computed_height, 0, channels);
             printf("resized \n");
             STBI_FREE(image);
 
             image = new_image;
         }
 
-        apply_dithering_16(image, target_width, target_height);
+        apply_dithering_16(image, computed_width, computed_height);
         printf("dithered \n");
 
         for (int i = 0; i < total_client; ++i) {
             inputs[i].image = image;
             inputs[i].idx = i;
             inputs[i].filename = filename;
+            inputs[i].apply_padding = should_apply_paddings;
+            inputs[i].target_width = computed_width;
+            inputs[i].target_height = computed_height;
 
             if (pthread_create(&threads[i], NULL, split_img, &inputs[i])) {
                 printf("failed to create threads\n");
