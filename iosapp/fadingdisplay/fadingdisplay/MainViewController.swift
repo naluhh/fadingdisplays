@@ -10,7 +10,7 @@ import UIKit
 import CoreImage
 
 //let screenResolution = CGSize.init(width: 5616, height: 3744) // Resolution without padding.
-let screenResolution = CGSize.init(width: 5616 + 100 * 3, height: 3744 + 80) // Resolution without padding.
+let screenResolution = CGSize.init(width: 5616 + 100 * 3, height: 3744 + 80) // Resolution with padding.
 
 class ImageCell: UICollectionViewCell {
     static let reuseIdentifier = "ImageCell"

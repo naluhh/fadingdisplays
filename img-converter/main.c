@@ -34,13 +34,13 @@ const int y_split = 4;
 const int total_client = x_split * y_split;
 const int h_padding = 100;
 const int v_padding = 80;
-const int target_width = 3744;
-const int target_height = 5616;
-const float target_width_f = target_width;
-const float target_height_f = target_height;
+const int _target_width = 3744;
+const int _target_height = 5616;
+const float target_width_f = _target_width;
+const float target_height_f = _target_height;
 const float no_padding_ratio = target_height_f / target_width_f;
-const int target_width_with_padding = target_width + (x_split - 1) * h_padding;
-const int target_height_with_padding = target_height + (y_split - 1) * v_padding;
+const int target_width_with_padding = _target_width + (x_split - 1) * v_padding;
+const int target_height_with_padding = _target_height + (y_split - 1) * h_padding;
 const int splitted_w = 1872;
 const int splitted_h = 1404;
 
@@ -369,6 +369,7 @@ void *split_img(void *input_struct) {
         y_orig += y_idx * h_padding;
     }
 
+    printf("idx: %d %d, max : %d %d; total_size: %d %d\n", x_idx, y_idx, x_orig + splitted_w, y_orig + splitted_h, input->target_width, input->target_height);
     write_png_file(filename + 1, input->image, x_orig, y_orig, splitted_w, splitted_h, input->target_width, input->target_height);
 
 
@@ -407,8 +408,8 @@ int set_image(char *filename) {
                                    0);
         float ratio = width / (float)height;
         int should_apply_paddings = ABS(ratio - no_padding_ratio) > 0.01;
-        int computed_width = should_apply_paddings ? target_width_with_padding : target_width;
-        int computed_height = should_apply_paddings ? target_height_with_padding : target_height;
+        int computed_width = should_apply_paddings ? target_width_with_padding : _target_width;
+        int computed_height = should_apply_paddings ? target_height_with_padding : _target_height;
 
         printf("loaded with padding: %d  ratio is %f, delta is %f \n", should_apply_paddings, ratio, ABS(ratio - no_padding_ratio));
         if (image == NULL) {
