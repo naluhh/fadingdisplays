@@ -46,8 +46,8 @@ var extra_images: [UIImage] = []
 typealias ImageID = Int
 
 class RequestManager {
-//    var baseUrl = "http://192.168.86.160:3000/"
-        var baseUrl = "http://192.168.86.27:3000/"
+    var baseUrl = "http://192.168.86.160:3000/"
+//        var baseUrl = "http://192.168.86.27:3000/"
 
 
     func getCurrentItem(successCallback: @escaping (ImageID)->(), errorCallback: @escaping (Error)->()) {

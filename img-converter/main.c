@@ -316,9 +316,9 @@ void apply_dithering_16(uint8_t *image, int width, int height) {
 
             float sum = image[origin_idx] + error[x];
 
-//            if (sum > 255.0) {
-//                sum = 255.0;
-//            }
+            if (sum > 255.0) {
+                sum = 255.0;
+            }
 
             int target_v = (sum + 0.5) / 16.0;
             int target = target_v * 16;
