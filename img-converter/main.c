@@ -314,7 +314,16 @@ void apply_dithering_16(uint8_t *image, int width, int height) {
             int origin_idx = (y * width + x);
             int dest_idx = pixel_idx;
 
-            float sum = image[origin_idx] + error[x];
+            float err = 0.f;
+
+            if (x > 0) {
+                err += error[x + width - 1] * 0.5;
+            }
+            if (y > 0) {
+                err += error[x] * 0.5;
+            }
+
+            float sum = image[origin_idx] + err;
 
             if (sum > 255.0) {
                 sum = 255.0;
@@ -323,22 +332,8 @@ void apply_dithering_16(uint8_t *image, int width, int height) {
             int target_v = (sum + 0.5) / 16.0;
             int target = target_v * 16;
 
-            float err = (sum - target);
-
+            error[x + width] = (sum - target);
             image[dest_idx] = (uint8_t)target;
-
-            if (x < width - 1) {
-                error[x + 1] += 7.0/16.0 * err;
-            }
-            if (y < height - 1 && x > 0) {
-                error[x - 1 + width] += 3.0/16 * err;
-            }
-            if (y < height - 1) {
-                error[x + width] += 5.0/16.0 * err;
-            }
-            if (x < width - 1 && y < height - 1) {
-                error[x + width + 1] += 1.0/16.0 * err;
-            }
         }
     }
 
