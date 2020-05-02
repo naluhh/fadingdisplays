@@ -9,45 +9,48 @@
 import Foundation
 import UIKit
 
-#if MOCK_API
-var mock_images = ["aeroplane-airplane-architectural-design-1010079-out.png-crop",
-    "aging-black-and-white-homeless-34534-out.png",
-    "animals-black-and-white-equine-52500-out.png",
-    "architecture-black-and-white-bridge-164357-out.png",
-    "asphalt-bitumen-black-and-white-1038935-out.png",
-    "astronomy-black-and-white-bright-47367-out.png",
-    "attractive-beautiful-beauty-594421-out.png",
-    "bare-tree-black-and-white-black-and-white-753575-out.png",
-    "beautiful-black-and-white-bloom-414214-out.png",
-    "big-ben",
-    "black-and-white-black-and-white-card-1496146-out.png",
-    "black-and-white-black-and-white-monochrome-707676-out.png",
-    "black-and-white-bloom-blossom-57905-out.png",
-    "black-and-white-bookcase-books-256453-out.png",
-    "black-and-white-branch-cherry-blossom-34435-out.png",
-    "black-and-white-child-cute-48794-out.png",
-    "black-and-white-close-up-drop-of-water-823-out.png",
-    "black-and-white-perspective-railroad-285286-out.png",
-    "black-black-and-white-close-up-1053924-out.png",
-    "dandelion.png",
-    "lake_waterfall.png",
-    "trees-crop.png",
-    "africa-animal-black-and-white-39245-out.png",
-    "aircraft-black-and-white-cold-1867001-out.png",
-    "animal-cat-eyes-33537-out.png",
-    "aquatic-plant-beautiful-black-and-white-1563895-out.png",
-    "architecture-black-and-white-building-358345-out.png",
-    "black-and-white-black-and-white-boats-33229-out.png",
-    "black-black-and-white-black-and-white-236296-out.png",
-    "black-white-black-and-white-board-game-957312-out.png"]
-
-var extra_images: [UIImage] = []
-#endif
 typealias ImageID = Int
+
+extension UIImage {
+
+    func resize(target: CGSize) -> UIImage? {
+        UIGraphicsBeginImageContext(target)
+        self.draw(in: CGRect(x: 0, y: 0, width: target.width, height: target.height))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return newImage
+    }
+
+    class func withImageIdFromCache(imageId: ImageID) -> UIImage? {
+        let named = "\(imageId).png"
+        if let dir = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) {
+            return UIImage(contentsOfFile: URL(fileURLWithPath: dir.absoluteString).appendingPathComponent(named).path)
+        }
+        return nil
+    }
+
+    func saveWithImageId(imageId: ImageID) {
+        guard let data = self.jpegData(compressionQuality: 1.0) else {
+            return
+        }
+        guard let directory = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) as NSURL else {
+            return
+        }
+        do {
+            let named = "\(imageId).png"
+            try data.write(to: directory.appendingPathComponent(named)!)
+            return
+        } catch {
+            print(error.localizedDescription)
+            return
+        }
+    }
+}
 
 class RequestManager {
 //    var baseUrl = "http://192.168.86.160:3000/"
-        var baseUrl = "http://192.168.86.27:3000/"
+        var baseUrl = "http://192.168.86.160:3000/"
 
 
     func getCurrentItem(successCallback: @escaping (ImageID)->(), errorCallback: @escaping (Error)->()) {
@@ -122,12 +125,6 @@ class RequestManager {
     }
 
     func getLibrary(successCallback: @escaping ([ImageID])->(), errorCallback: @escaping (Error)->()) {
-        #if MOCK_API
-        successCallback(Array<ImageID>(0...mock_images.count - 1 + extra_images.count - 1));
-            return
-        #endif
-
-
         let url = baseUrl + "library"
 
         let task = URLSession.shared.dataTask(with: URL(string: url)!) { (data, response, error) in
@@ -151,12 +148,6 @@ class RequestManager {
     }
 
     func uploadImage(image: UIImage, successCallback: @escaping (ImageID)->(), errorCallback: @escaping (Error)->()) {
-        #if MOCK_API
-        extra_images.append(image)
-        successCallback(mock_images.count + extra_images.count - 1)
-        return
-        #endif
-
         guard let imageData = image.pngData() else {
             return
         }
@@ -197,32 +188,40 @@ class RequestManager {
     }
 
     func getImageWithId(id: ImageID, successCallback: @escaping (UIImage)->(), errorCallback: @escaping (Error)->()) {
-        #if MOCK_API
-        if id >= mock_images.count {
-            successCallback(extra_images[id - mock_images.count])
-        } else if let image = UIImage(named: mock_images[id]) {
-            successCallback(image);
-        }
-        return;
-        #endif
-
         let url = baseUrl + "library/\(id)"
 
-        let task = URLSession.shared.dataTask(with: URL(string: url)!) { (data, response, error) in
-            guard let downloadedData = data, let image = UIImage(data: downloadedData) else {
-                if let error = error {
-                    DispatchQueue.main.async {
-                        errorCallback(error)
-                    }
+        DispatchQueue.global().async {
+            if let image = UIImage.withImageIdFromCache(imageId: id) {
+                DispatchQueue.main.async {
+                    successCallback(image)
                 }
                 return
             }
 
-            DispatchQueue.main.async {
-                successCallback(image)
-            }
-        }
+            let task = URLSession.shared.dataTask(with: URL(string: url)!) { (data, response, error) in
+                guard let downloadedData = data, var image = UIImage(data: downloadedData) else {
+                    if let error = error {
+                        DispatchQueue.main.async {
+                            errorCallback(error)
+                        }
+                    }
+                    return
+                }
 
-        task.resume()
+                if image.size.width > 1000 || image.size.height > 1000 {
+                    let factor = 1000.0 / max(image.size.width, image.size.height)
+                    let target = CGSize(width: (image.size.width * factor).rounded(), height: (image.size.height * factor).rounded())
+                    if let newImage = image.resize(target: target) {
+                        image = newImage
+                    }
+                }
+                image.saveWithImageId(imageId: id)
+                DispatchQueue.main.async {
+                    successCallback(image)
+                }
+            }
+
+            task.resume()
+        }
     }
 }

@@ -44,7 +44,7 @@ const int target_height_with_padding = _target_height + (y_split - 1) * h_paddin
 const int splitted_w = 1872;
 const int splitted_h = 1404;
 
-const char idx_to_ip[8][16] = {"192.168.86.46", "192.168.86.249", // bottom right, top right
+const char idx_to_ip[8][16] = {"192.168.86.46", "192.168.86.249", // bottom left, top right
                                "192.168.86.43", "192.168.86.25",
                                "192.168.86.38", "192.168.86.21",
                                "192.168.86.29", "192.168.86.36"}; // TODO: Replace by rasp ips
@@ -346,7 +346,9 @@ void *send_img(void *input_struct) {
     char filename[256];
     snprintf(filename, 256, "U%s-%d", input->filename, input->idx);
 
-    send_to_server((char*)idx_to_ip[input->idx], 8888, filename);
+    if (input->idx != 1) { // controller dead :(
+        send_to_server((char*)idx_to_ip[input->idx], 8888, filename);
+    }
 
     return NULL;
 }
@@ -372,8 +374,9 @@ void *split_img(void *input_struct) {
     printf("idx: %d %d, max : %d %d; total_size: %d %d\n", x_idx, y_idx, x_orig + splitted_w, y_orig + splitted_h, input->target_width, input->target_height);
     write_png_file(filename + 1, input->image, x_orig, y_orig, splitted_w, splitted_h, input->target_width, input->target_height);
 
-
-    send_to_server((char*)idx_to_ip[input->idx], 8888, filename);
+    if (input->idx != 1) { // controller dead :(
+        send_to_server((char*)idx_to_ip[input->idx], 8888, filename);
+    }
 
     return NULL;
 }
