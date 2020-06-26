@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "C743E76F-6081-47B7-B345-32F10061B8F9"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "2557685F-3CCC-461B-8B35-A47E02280FEA"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.486444"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "69"
+            endingLineNumber = "69"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "FD3B3F27-2D1C-48B3-9D7F-35F41458E02A"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.487592"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "60"
+            endingLineNumber = "60"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C35C9DCD-2408-4379-BD2A-6479C2F63BDB"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.487811"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "70"
+            endingLineNumber = "70"
+            landmarkName = "unknown"
+            landmarkType = "0">
+            <Locations>
+               <Location
+                  uuid = "C35C9DCD-2408-4379-BD2A-6479C2F63BDB - e17b71c99c77bd15"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Optional&lt;Foundation.Data&gt;, Swift.Optional&lt;__C.NSURLResponse&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in fadingdisplay.RequestManager.getCurrentItem(successCallback: (Swift.Int) -&gt; (), errorCallback: (Swift.Error) -&gt; ()) -&gt; ()"
+                  moduleName = "fadingdisplay"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cdelaroche/Desktop/eink/fadingdisplays/iosapp/fadingdisplay/fadingdisplay/request/request.swift"
+                  timestampString = "0"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "65"
+                  endingLineNumber = "65"
+                  offsetFromSymbolStart = "1080">
+               </Location>
+               <Location
+                  uuid = "C35C9DCD-2408-4379-BD2A-6479C2F63BDB - 7d3c9cdf42e9225f"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 () -&gt; () in closure #1 (Swift.Optional&lt;Foundation.Data&gt;, Swift.Optional&lt;__C.NSURLResponse&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in fadingdisplay.RequestManager.getCurrentItem(successCallback: (Swift.Int) -&gt; (), errorCallback: (Swift.Error) -&gt; ()) -&gt; ()"
+                  moduleName = "fadingdisplay"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cdelaroche/Desktop/eink/fadingdisplays/iosapp/fadingdisplay/fadingdisplay/request/request.swift"
+                  timestampString = "0"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "66"
+                  endingLineNumber = "66"
+                  offsetFromSymbolStart = "112">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "02FD6621-504D-4359-B299-A7C8503BF2D6"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.488029"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "71"
+            endingLineNumber = "71"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "59701479-6C72-48B8-AE1A-65E180E7CCB9"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.488238"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "85"
+            endingLineNumber = "85"
+            landmarkName = "unknown"
+            landmarkType = "0">
+            <Locations>
+               <Location
+                  uuid = "59701479-6C72-48B8-AE1A-65E180E7CCB9 - 7ddf896fbaab62cc"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "fadingdisplay.RequestManager.deleteItemWithId(id: Swift.Int, successCallback: () -&gt; (), errorCallback: (Swift.Error) -&gt; ()) -&gt; ()"
+                  moduleName = "fadingdisplay"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cdelaroche/Desktop/eink/fadingdisplays/iosapp/fadingdisplay/fadingdisplay/request/request.swift"
+                  timestampString = "0"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "80"
+                  endingLineNumber = "80"
+                  offsetFromSymbolStart = "1052">
+               </Location>
+               <Location
+                  uuid = "59701479-6C72-48B8-AE1A-65E180E7CCB9 - 7b0a8a133fde5f2d"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Optional&lt;Foundation.Data&gt;, Swift.Optional&lt;__C.NSURLResponse&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in fadingdisplay.RequestManager.deleteItemWithId(id: Swift.Int, successCallback: () -&gt; (), errorCallback: (Swift.Error) -&gt; ()) -&gt; ()"
+                  moduleName = "fadingdisplay"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cdelaroche/Desktop/eink/fadingdisplays/iosapp/fadingdisplay/fadingdisplay/request/request.swift"
+                  timestampString = "0"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "81"
+                  endingLineNumber = "81"
+                  offsetFromSymbolStart = "352">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6BB44ABC-92D7-45A6-AC5E-B0244A255080"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.488463"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "86"
+            endingLineNumber = "86"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "8D84D5FF-1339-4E6E-9C87-4D4D73890C9E"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/MainViewController.swift"
+            timestampString = "610135350.488673"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "244"
+            endingLineNumber = "244"
+            landmarkName = "cropViewController(_:didCropToImage:withRect:angle:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "8D84D5FF-1339-4E6E-9C87-4D4D73890C9E - 550b3bf5c274aa8"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "fadingdisplay.MainViewController.cropViewController(_: fadingdisplay.CropViewController, didCropToImage: __C.UIImage, withRect: __C.CGRect, angle: Swift.Int) -&gt; ()"
+                  moduleName = "fadingdisplay"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cdelaroche/Desktop/eink/fadingdisplays/iosapp/fadingdisplay/fadingdisplay/MainViewController.swift"
+                  timestampString = "595104644.09717"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "243"
+                  endingLineNumber = "243"
+                  offsetFromSymbolStart = "300">
+               </Location>
+               <Location
+                  uuid = "8D84D5FF-1339-4E6E-9C87-4D4D73890C9E - b6cb3c6c17a71a62"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Int) -&gt; () in fadingdisplay.MainViewController.cropViewController(_: fadingdisplay.CropViewController, didCropToImage: __C.UIImage, withRect: __C.CGRect, angle: Swift.Int) -&gt; ()"
+                  moduleName = "fadingdisplay"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cdelaroche/Desktop/eink/fadingdisplays/iosapp/fadingdisplay/fadingdisplay/MainViewController.swift"
+                  timestampString = "595104644.099382"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "243"
+                  endingLineNumber = "243"
+                  offsetFromSymbolStart = "120">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "16CB413B-D098-4687-86A7-0EB96611DEE1"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.488728"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "151"
+            endingLineNumber = "151"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B3332C13-421F-42F6-821F-811A19216930"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.48893"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "172"
+            endingLineNumber = "172"
+            landmarkName = "unknown"
+            landmarkType = "0">
+            <Locations>
+               <Location
+                  uuid = "B3332C13-421F-42F6-821F-811A19216930 - 717163e5dc385987"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "fadingdisplay.RequestManager.uploadImage(image: __C.UIImage, successCallback: (Swift.Int) -&gt; (), errorCallback: (Swift.Error) -&gt; ()) -&gt; ()"
+                  moduleName = "fadingdisplay"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cdelaroche/Desktop/eink/fadingdisplays/iosapp/fadingdisplay/fadingdisplay/request/request.swift"
+                  timestampString = "595104666.579296"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "179"
+                  endingLineNumber = "179"
+                  offsetFromSymbolStart = "3652">
+               </Location>
+               <Location
+                  uuid = "B3332C13-421F-42F6-821F-811A19216930 - b6106c49a960183c"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Optional&lt;Foundation.Data&gt;, Swift.Optional&lt;__C.NSURLResponse&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in fadingdisplay.RequestManager.uploadImage(image: __C.UIImage, successCallback: (Swift.Int) -&gt; (), errorCallback: (Swift.Error) -&gt; ()) -&gt; ()"
+                  moduleName = "fadingdisplay"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cdelaroche/Desktop/eink/fadingdisplays/iosapp/fadingdisplay/fadingdisplay/request/request.swift"
+                  timestampString = "595104666.58121"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "180"
+                  endingLineNumber = "180"
+                  offsetFromSymbolStart = "288">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "360EE0EB-3D22-422D-8AF1-4FC16FE3AD82"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.489167"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "173"
+            endingLineNumber = "173"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "60A22DCD-0824-4A18-A5DD-EF4438E3D9BF"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.489387"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "174"
+            endingLineNumber = "174"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "5F4BB4AA-86BE-42F9-95DB-354166F32121"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.48961"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "179"
+            endingLineNumber = "179"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "99268202-5C18-418F-A5D8-B73BBF7712AA"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.4897979"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "182"
+            endingLineNumber = "182"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "FACEA3C5-6173-4E81-8CD3-FC9BFF474C37"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/MainViewController.swift"
+            timestampString = "610135350.489984"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "245"
+            endingLineNumber = "245"
+            landmarkName = "cropViewController(_:didCropToImage:withRect:angle:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "2C4E24E3-384A-4AAA-B682-0575693467F2"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/MainViewController.swift"
+            timestampString = "610135350.4900351"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "189"
+            endingLineNumber = "189"
+            landmarkName = "didLongPress(gest:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "8DAFDD01-3F03-4AA6-A76F-1D605C87674D"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/MainViewController.swift"
+            timestampString = "610135350.490069"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "191"
+            endingLineNumber = "191"
+            landmarkName = "didLongPress(gest:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/MainViewController.swift"
+            timestampString = "610135350.490117"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "226"
+            endingLineNumber = "226"
+            landmarkName = "imagePickerController(_:didFinishPickingMediaWithInfo:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "fadingdisplay/request/request.swift"
+            timestampString = "610135350.490149"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "195"
+            endingLineNumber = "195"
+            landmarkName = "unknown"
+            landmarkType = "0">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; () in fadingdisplay.RequestManager.getImageWithId(id: Swift.Int, successCallback: (__C.UIImage) -&gt; (), errorCallback: (Swift.Error) -&gt; ()) -&gt; ()"
+                  moduleName = "fadingdisplay"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cdelaroche/Desktop/to_transfer/eink/fadingdisplays/iosapp/fadingdisplay/fadingdisplay/request/request.swift"
+                  timestampString = "606511411.722033"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "195"
+                  endingLineNumber = "195"
+                  offsetFromSymbolStart = "496">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; () in closure #1 () -&gt; () in fadingdisplay.RequestManager.getImageWithId(id: Swift.Int, successCallback: (__C.UIImage) -&gt; (), errorCallback: (Swift.Error) -&gt; ()) -&gt; ()"
+                  moduleName = "fadingdisplay"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/cdelaroche/Desktop/to_transfer/eink/fadingdisplays/iosapp/fadingdisplay/fadingdisplay/request/request.swift"
+                  timestampString = "606511411.723453"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "196"
+                  endingLineNumber = "196"
+                  offsetFromSymbolStart = "112">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
