@@ -44,7 +44,7 @@ const int target_height_with_padding = _target_height + (y_split - 1) * h_paddin
 const int splitted_w = 1872;
 const int splitted_h = 1404;
 
-const char idx_to_ip[8][16] = {"192.168.86.46", "192.168.86.249", // bottom left, top right
+const char idx_to_ip[8][16] = {"192.168.86.46", "192.168.86.44", // bottom left, top right
                                "192.168.86.43", "192.168.86.25",
                                "192.168.86.38", "192.168.86.21",
                                "192.168.86.29", "192.168.86.36"}; // TODO: Replace by rasp ips
